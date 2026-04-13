@@ -1,1 +1,16 @@
 .vs/
+# 빌드 결과물 (실행 파일 및 중간 파일)
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.log
+
+# Visual Studio 임시 파일
+.vs/
+*.user
+*.suo
