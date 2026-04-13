@@ -8,11 +8,10 @@ int main() {
 
 	cout << filesystem::current_path() << endl; // 어느 위치에서 실행되는지 출력
 
-	vector<int> lastindexmap;
 	vector <Todo> td;
+	vector<int> displayToid;
 	string input;
 	int input1;
-	string input2;
 	int num = 1;
 
 	loadFromfile(td, num);
@@ -20,12 +19,13 @@ int main() {
 	map <string, function<void(string)>> commends;
 	// add
 	commends["add"] = [&](string arg) {
-		if (arg.empty() || isblank(arg)) {
-			cout << "내용을 입력하세요" << endl;
+		if (arg.empty() || isblank(arg) || arg.find('|') != string::npos) {
+			cout << "잘못된 입력입니다.('|' 문자는 사용하실 수 없습니다)" << endl;
 			return;
 		}
 		addTodos(td, num, arg);
 		saveTofile(td);
+		printTodos(td, displayToid);
 		};
 	//remove
 	commends["remove"] = [&](string arg) {
@@ -33,47 +33,129 @@ int main() {
 			cout << "내용을 입력하세요" << endl;
 			return;
 		}
-		removeTodo3(td, arg);
-		if (td.empty()) num = 1;
-		saveTofile(td);
+		string upperarg = arg;
+		for (char& c : upperarg) {
+			c = toupper(c);
+		}
+
+		if (upperarg == "TODO" || upperarg == "DOING" || upperarg == "DONE") {
+			if (removeTodo3(td, arg)) {
+				saveTofile(td);
+				printTodos(td, displayToid);
+				cout << "삭제가 완료되었습니다." << endl;
+			}
+			else {
+				cout << "삭제할 항목이 없습니다." << endl;
+			}
+			return;
+		}
+
+		int displayindex;
+		if (!safe_stoi(arg, displayindex)) {
+			cout << "숫자를 입력하세요" << endl;
+			return;
+		}
+
+		int realid;
+		if (!getrealIdfromdisplayindex(displayToid, displayindex, realid)) {
+			cout << "잘못된 번호입니다." << endl;
+			return;
+		}
+
+		if (removeTodo3(td, to_string(realid))) {
+			saveTofile(td);
+			printTodos(td, displayToid);
+			cout << "삭제가 완료되었습니다." << endl;
+		}
+		else {
+			cout << "삭제할 항목이 없습니다." << endl;
+		}
 		};
 	//doing
 	commends["doing"] = [&](string arg) {
-		if (!safe_stoi(arg, input1)) {
-			cout << "wrong number" << endl;
+		if (arg.empty() || isblank(arg)) {
+			cout << "내용을 입력하세요" << endl;
 			return;
 		}
-		if (updateStatus(td, input1, status::DOING)) {
-			cout << "\n변경이 완료되었습니다" << endl;
+
+		int displayIndex;
+		if (!safe_stoi(arg, displayIndex)) {
+			cout << "숫자를 입력하세요" << endl;
+			return;
+		}
+
+		int realId;
+		if (!getrealIdfromdisplayindex(displayToid, displayIndex, realId)) {
+			cout << "잘못된 번호입니다." << endl;
+			return;
+		}
+
+		if (updateStatus(td, realId, status::DOING)) {
 			saveTofile(td);
+			printTodos(td, displayToid);
+		}
+		else {
+			cout << "상태 변경 실패" << endl;
 		}
 	};
 	//done
 	commends["done"] = [&](string arg) {
-		if (!safe_stoi(arg, input1)) {
-			cout << "wrong number" << endl;
+		if (arg.empty() || isblank(arg)) {
+			cout << "내용을 입력하세요" << endl;
 			return;
 		}
-		if (updateStatus(td, input1, status::DONE)) {
-			cout << "\n변경이 완료되었습니다" << endl;
+
+		int displayIndex;
+		if (!safe_stoi(arg, displayIndex)) {
+			cout << "숫자를 입력하세요" << endl;
+			return;
+		}
+
+		int realId;
+		if (!getrealIdfromdisplayindex(displayToid, displayIndex, realId)) {
+			cout << "잘못된 번호입니다." << endl;
+			return;
+		}
+
+		if (updateStatus(td, realId, status::DONE)) {
 			saveTofile(td);
+			printTodos(td, displayToid);
+		}
+		else {
+			cout << "상태 변경 실패" << endl;
 		}
 	};
 	//todo
 	commends["todo"] = [&](string arg) {
-		if (!safe_stoi(arg, input1)) {
-			cout << "wrong number" << endl;
+		if (arg.empty() || isblank(arg)) {
+			cout << "내용을 입력하세요" << endl;
 			return;
 		}
-		if (updateStatus(td, input1, status::TODO)) {
-			cout << "\n변경이 완료되었습니다" << endl;
+
+		int displayIndex;
+		if (!safe_stoi(arg, displayIndex)) {
+			cout << "숫자를 입력하세요" << endl;
+			return;
+		}
+
+		int realId;
+		if (!getrealIdfromdisplayindex(displayToid, displayIndex, realId)) {
+			cout << "잘못된 번호입니다." << endl;
+			return;
+		}
+
+		if (updateStatus(td, realId, status::TODO)) {
 			saveTofile(td);
+			printTodos(td, displayToid);
+		}
+		else {
+			cout << "상태 변경 실패" << endl;
 		}
 	};
 
 	//list
 	commends["list"] = [&](string) {
-		printTodos(td);
+		printTodos(td, displayToid);
 	};
 
 	while (true) {

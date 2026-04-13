@@ -49,11 +49,17 @@ bool isblank(const string& s) {
 	return true; // 공백이 있으면 true
 }
 
-void printTodos(const vector<Todo>& td) {
+void printTodos(const vector<Todo>& td, vector<int>& displayToid) {
+	displayToid.clear();
+
+	if (td.empty()) {
+		return;
+	}
 	int displayindex = 1;
 
-	for (const auto& t : td) {
-		cout << displayindex++ << ". " << t.task << statusTostring(t.st) << "\n\n";
+	for (size_t i = 0; i < td.size(); i++) {
+		cout << i + 1 << ". " << td[i].task << statusTostring(td[i].st) << "\n\n";
+		displayToid.push_back(td[i].num);
 	}
 }
 
@@ -207,3 +213,11 @@ bool removeTodo3(vector <Todo>& td, const string& s) {
 	return removeIf(td, [id](const Todo& t) {return t.num == id; });
 }
 
+bool getrealIdfromdisplayindex(const vector<int>& displayToid, int displayindex, int& realid) {
+	if (displayindex < 1 || displayindex >(int)displayToid.size()) {
+		return false;
+	}
+
+	realid = displayToid[displayindex - 1];
+	return true;
+}
